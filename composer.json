@@ -1,0 +1,36 @@
+{
+    "name": "ngen/Zf2Navigation",
+    "description": "Dynamic Navigation System of Zend Framework 2",
+    "type": "library",
+	"license": "GPL V2",
+    "keywords": [
+        "zf2",
+		"ngen",
+        "navigation"
+    ],
+    "authors": [
+        {
+            "name": "Starx",
+            "email": "mail@mrnepal.com",
+            "homepage": "http://mrnepal.com"
+        }
+    ],
+    "require": {	
+    },
+    "autoload": {
+        "psr-0": {
+            "nGen\Zf2Navigation": "src/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    }
+}
+    "autoload": {
+        "psr-0": {
+            "nGenZfc": "src/"
+        },
+        "classmap": [
+            "./Module.php"
+        ]
+    }
