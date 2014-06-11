@@ -18,8 +18,7 @@
     ],
     "require": {
         "zf-commons/zfc-base": "dev-master",
-        "ngen/zfc": "dev-master",
-        "neilime/zf2-twb-bundle": "2.*@stable"
+        "ngen/zfc": "dev-master"
     },
     "autoload": {
         "psr-0": {
