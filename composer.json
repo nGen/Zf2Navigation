@@ -1,7 +1,7 @@
 {
     "name": "ngen/zf2navigation",
     "description": "Dynamic Navigation System for Zend Framework 2",
-    "type": "Library & Management System",
+    "type": "Library and Management System",
 	"license": "GPL V2",
     "keywords": [
         "zf2",
@@ -16,7 +16,7 @@
             "homepage": "http://mrnepal.com"
         }
     ],
-    "require-dev": {
+    "require": {
         "zf-commons/zfc-base": "dev-master",
         "ngen/zfc": "dev-master",
         "neilime/zf2-twb-bundle": "2.*@stable"
