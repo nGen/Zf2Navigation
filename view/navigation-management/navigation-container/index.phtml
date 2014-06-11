@@ -1,0 +1,62 @@
+<?php
+	$this -> headTitle($title);
+?>
+<h1><?php echo $this -> escapeHtml(isset($pluralTitle) ? $pluralTitle: $title); ?></h1>
+<p>
+    <a class="btn btn-success btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'generate')); ?>">Generate</a>
+    <a class="btn btn-primary btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'add')); ?>">Add new <?php echo $title; ?></a>
+</p>
+
+<?php
+if(isset($msg)) {
+    echo <<<HTML
+        <div class="alert alert-{$msg['type']} alert-dismissable msg">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {$msg['msg']}
+        </div>
+HTML;
+}
+
+if($rows -> getTotalItemCount()> 0) :
+?>  
+<table class="table">
+    <tr>
+        <th>Title</th>
+        <th>&nbsp;</th>
+    </tr>
+    <?php foreach($rows as $row):
+        $menuLink = $this -> url($subRouteName, array('action' => 'index', 'container' => $row -> name, 'parent' => 0));
+	?>
+    <tr>
+        <td>
+            <?php 
+                echo "<a href='$menuLink'>".$this -> escapeHtml($row -> name)."</a>"; 
+            ?>
+        </td>
+        <td>
+            <a class="btn btn-default btn-sm" href="<?php echo $menuLink; ?>">Add Links</a>
+            <a class="btn btn-default btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'edit', 'id' => $row -> id)); ?>">Edit</a>
+            <a class="btn btn-default btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'delete', 'id' => $row -> id)); ?>">Delete</a>            
+            <?php if($row -> status == '0') { ?>
+                <a class="btn btn-default btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'enable', 'id' => $row -> id)); ?>">Enable</a>
+            <?php } else {?>
+                <a class="btn btn-default btn-sm" href="<?php echo $this -> url($adminRouteName, array('action' => 'disable', 'id' => $row -> id)); ?>">Disable</a>
+            <?php } ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+
+<?php
+echo $this->paginationControl(
+	$rows,
+	// the scrolling style
+	'sliding',
+	// the partial to use to render the control
+	array('partial/paginator.phtml', 'Application'),
+	// the route to link to when a user clicks a control link
+	array(
+		'route' => $adminRouteName
+	)
+);
+endif;
