@@ -55,3 +55,43 @@ Installation
 1. Install the [ZF2Navigation](https://github.com/nGen/Zf2Navigation) ZF2 module
    by cloning it into `./vendor/`.
 2. Clone this project into your `./vendor/` directory.
+
+
+### Post installation
+
+1. Enabling it in your `application.config.php`file.
+
+    ```php
+    <?php
+    return array(
+        'modules' => array(
+            // ...
+            'ZfcBase',
+            'nGen\Zfc',
+            'nGen\Zf2Navigation',
+		    'TwbBundle',
+        ),
+        // ...
+    );
+    ```
+
+2. Then Import the SQL schema located in `./vendor/ngen/zf2navigation/data/schema.sql` (if you installed using the Composer) or in `./vendor/zf2navigation/data/schema.sql`.
+
+3. Copy the `nav.global.php` from the `./vendor/ngen/zf2navigation/config` directory into `config/autoload` directory and give it 777 permission.
+
+4. Copy either `zf2navigation.default.global.php.dist` or `zf2navigation.admin.global.php.dist` from the `./vendor/ngen/zf2navigation/config` directory into `config/autoload` directory and remove the `.dist` at the end of the file. 
+    * `zf2navigation.admin.global.php.dist`: It contains route configuration with which you can directly embed the navigation management system into the admin route.
+    * `zf2navigation.admin.global.php.dist`: It contains default route configuration.
+    
+5. Update the `base_path` with location to your project root (not public directory), absolute path is preferred. It is used by the library to find the nav.global.php to write the configuration settings on.
+
+6. Lastly, it should have a working db connection to start creating and adding menus. Go ahead and configure DB Adapter for that. 
+
+7. We are all set, navigation to `project/path/navigation` or `/project/path/admin/navigation` depending on with configuration you used.
+
+Author
+------
+
+[Starx](http://mrnepal.com)
+[Project Site](http://ngeneric.com)
+
