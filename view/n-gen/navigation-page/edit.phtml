@@ -1,0 +1,27 @@
+<?php
+$this->headTitle($title);
+?>
+<h1>Edit <?php echo $this->escapeHtml($title); ?></h1>
+<?php
+if(isset($msg)) {
+    echo <<<HTML
+        <div class="alert alert-{$msg['type']} alert-dismissable msg">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {$msg['msg']}
+        </div>
+HTML;
+}
+
+$form -> setAttribute('action', $this -> url(
+    $adminRouteName,
+    array(
+        'action' => 'edit',
+        'id' => $this -> id,
+    )
+));
+$form -> prepare();
+
+echo $this -> form() -> openTag($form);
+echo $this -> formCollection($form); //Render as per the Form Class
+echo $this -> form() -> closeTag();
+?>

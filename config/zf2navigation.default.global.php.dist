@@ -1,0 +1,54 @@
+<?php
+/**
+ * Modify the Route Configuration if needed
+ */
+return array(    
+    'base_path' => '/path/to/base',
+    'Zf2NavigationControllerRouteName' => 'admin/navigation/default',
+    'Zf2NavigationPageRouteName' => 'admin/navigation/page',
+    'router' => array(
+        'routes' => array(
+            'navigation' => array(
+                'type'    => 'Literal',
+                'options' => array(
+                    'route'    => '/navigation',
+                    'defaults' => array(
+                        'controller'    => 'nGenZf2NavigationNavigationContainerController',
+                        'action'        => 'index',
+                    ),
+                ),
+                'may_terminate' => true,
+                'child_routes' => array(
+                    'default' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => '/[:action][/:id]',
+                            'constraints' => array(
+                                'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+                            ),
+                            'defaults' => array(
+                                'controller'    => 'nGenZf2NavigationNavigationContainerController',
+                                'action'        => 'index',          
+                            ),
+                        ),
+                    ), 'page' => array(
+                        'type'    => 'Segment',
+                        'options' => array(
+                            'route'    => '/menu-:container[/:parent][/:action][/:id]',
+                            'constraints' => array(
+                                'controller' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                'action'     => '[a-zA-Z][a-zA-Z0-9_-]*',
+                            ),
+                            'defaults' => array(
+                                'controller'    => 'nGenZf2NavigationNavigationPageController',
+                                'action'        => 'index',
+                                'parent'        => 0,
+                            ),
+                        ),
+                    ),
+                ),
+            ),            
+		),
+    ),
+);

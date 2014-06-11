@@ -1,0 +1,244 @@
+<?php
+$this -> headTitle($title);
+?>
+<h1><?php echo isset($pluralTitle) ? $pluralTitle: $title; ?></h1>
+<?php if(isset($subTitle)) { ?>
+    <h6>Parent: <b><?php echo $subTitle; ?></b></h6>
+<?php }
+if(isset($msg)) {
+    echo <<<HTML
+        <div class="alert alert-{$msg['type']} alert-dismissable msg">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+            {$msg['msg']}
+        </div>
+HTML;
+}
+
+$route_params = array('container' => $container, 'action' => $action, 'parent' => $parent);
+if($action == 'edit') {
+	$route_params['id'] = $id;
+}
+$form -> setAttribute('action', $this -> url($adminRouteName, $route_params));
+$form -> prepare();
+
+echo $this -> form() -> openTag($form);
+echo <<<HTML
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-2">{$this->formLabel($form->get('label'))}</div>
+		<div class="col-xs-12 col-sm-12 col-md-10">{$this->formRow($form->get('label'))}</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-2">{$this->formLabel($form->get('title'))}</div>
+		<div class="col-xs-12 col-sm-12 col-md-10">{$this->formRow($form->get('title'))}</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-2">{$this->formLabel($form->get('uri'))}</div>
+		<div class="col-xs-12 col-sm-12 col-md-10">{$this->formRow($form->get('uri'))}</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-12 col-sm-12 col-md-2">	
+			<label>Include in:</label>
+		</div>
+		<div class="col-xs-12 col-sm-12 col-md-10">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-4">	
+					<div class="row">
+						<div class="col-xs-6 col-md-4">{$this->formLabel($form->get('menu'))}</div>
+						<div class="col-xs-6 col-md-8">{$this->formRow($form->get('menu'))}</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-12 col-md-4">	
+					<div class="row">
+						<div class="col-xs-6 col-md-4">{$this->formLabel($form->get('breadcrumbs'))}</div>
+						<div class="col-xs-6 col-md-8">{$this->formRow($form->get('breadcrumbs'))}</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-12 col-md-4">	
+					<div class="row">
+						<div class="col-xs-6 col-md-4">{$this->formLabel($form->get('sitemap'))}</div>
+						<div class="col-xs-6 col-md-8">{$this->formRow($form->get('sitemap'))}</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form->get('advanced_settings'))}</div>
+		<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form->get('advanced_settings'))}</div>
+	</div>
+	<div class="row advanced_container hidden">
+		<div class="col-xs-12">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-2">{$this->formLabel($form -> get('advanced') -> get('route'))}</div>
+				<div class="col-xs-12 col-sm-12 col-md-10">{$this->formRow($form -> get('advanced') -> get('route'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-2">{$this->formLabel($form -> get('advanced') -> get('module'))}</div>
+				<div class="col-xs-12 col-sm-12 col-md-10">{$this->formRow($form -> get('advanced') -> get('module'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-6">	
+					<div class="row">
+						<div class="col-xs-12 col-sm-6 col-md-4">{$this->formLabel($form -> get('advanced') -> get('controller'))}</div>
+						<div class="col-xs-12 col-sm-6 col-md-8">{$this->formRow($form -> get('advanced') -> get('controller'))}</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-12 col-md-6">	
+					<div class="row">
+						<div class="col-xs-12 col-sm-6 col-md-4">{$this->formLabel($form -> get('advanced') -> get('action'))}</div>
+						<div class="col-xs-12 col-sm-6 col-md-8">{$this->formRow($form -> get('advanced') -> get('action'))}</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-2">{$this->formLabel($form->get('advanced')->get('params'))}</div>
+				<div class="col-xs-10 params">
+HTML;
+				$params = $form->get('advanced')->get('params') -> getIterator();
+				foreach($params as $param) {
+					$i = 0;
+					echo <<<HTML
+					<div class="row params" data-key="{$i}">
+						<div class="col-xs-5">{$this -> formRow($param -> get('param_name'))}</div>
+						<div class="col-xs-6">{$this -> formRow($param -> get('param_value'))}</div>
+						<div class="col-xs-1">
+							<a class="action remove btn btn-danger glyphicon glyphicon-minus"></a>
+						</div>
+					</div>
+HTML;
+					$i++;
+				}
+					echo <<<HTML
+					<div class="row">
+						<div class="col-xs-1">
+							<a class="action add btn btn-success glyphicon glyphicon-plus" id="add_params"></a>
+						</div>
+					</div>				
+				</div>
+			</div>			
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('reset_params'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('reset_params'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-6">	
+					<div class="row">
+						<div class="col-xs-6 col-md-4">{$this->formLabel($form -> get('advanced') -> get('active'))}</div>
+						<div class="col-xs-6 col-md-8">{$this->formRow($form -> get('advanced') -> get('active'))}</div>
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-12 col-md-6">	
+					<div class="row">
+						<div class="col-xs-6 col-md-4">{$this->formLabel($form -> get('advanced') -> get('visible'))}</div>
+						<div class="col-xs-6 col-md-8">{$this->formRow($form -> get('advanced') -> get('visible'))}</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('target'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('target'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('rel'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('rel'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('rev'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('rev'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('class'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('class'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-6 col-sm-6 col-md-2">{$this->formLabel($form -> get('advanced') -> get('position'))}</div>
+				<div class="col-xs-6 col-sm-6 col-md-10">{$this->formRow($form -> get('advanced') -> get('position'))}</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-2">{$this->formLabel($form->get('advanced')->get('properties'))}</div>
+				<div class="col-xs-10">
+HTML;
+				$properties = $form->get('advanced')->get('properties') -> getIterator();
+				foreach($properties as $param) {
+					$i = 0;
+					echo <<<HTML
+					<div data-key="{$i}" class="row properties">
+						<div class="col-xs-5">{$this -> formRow($param -> get('param_name'))}</div>
+						<div class="col-xs-6">{$this -> formRow($param -> get('param_value'))}</div>
+						<div class="col-xs-1">
+							<a class="action remove btn btn-danger glyphicon glyphicon-minus"></a>
+						</div>
+					</div>
+HTML;
+					$i++;
+				}
+					echo <<<HTML
+					<div class="row">
+						<div class="col-xs-1">
+							<a class="action add btn btn-success glyphicon glyphicon-plus" id="add_properties"></a>
+						</div>
+					</div>				
+				</div>
+			</div>						
+		</div>
+	</div>	
+	<div class="row">
+		<div class="col-xs-12">
+			{$this->formRow($form->get('id'))}
+			{$this->formRow($form->get('csrf'))}
+			{$this->formRow($form->get('submit'))}
+		</div>
+	</div>
+HTML;
+echo $this -> form() -> closeTag();
+?>
+<style>
+	form .row + .row { margin-top: 20px; }
+	.form-group label:not(.radio-inline), .form-group label.show { display: none !important; }
+	.form-group.has-error { margin-bottom: 0; }
+	.action.btn {
+		padding: 8px 22px 9px 9px;
+	}
+</style>
+<script>
+jQuery(function($) {
+	$(function() {
+		advanced_container = $('.advanced_container');
+		if($('[name="advanced_settings"]:checked').val() == 1) {
+			advanced_container.removeClass('hidden');
+		} else {
+			advanced_container.addClass('hidden');
+		}
+
+		$('[name="advanced_settings"]').on('change', function() {
+			if($(this).val() == '1') {
+				advanced_container.removeClass('hidden');
+			} else {
+				advanced_container.addClass('hidden');
+			}
+		});
+
+		$("#label").on('keyup', function() {
+			$("#title").val($(this).val());
+		});
+
+		$("#add_properties, #add_params").on('click', function() {
+			clicked = $(this).attr('id') == 'add_params' ? 'params' : 'properties';
+			key = parseInt($(".row." + clicked + ":last").data('key')) + 1;
+			if(!(key >= 0)) key = 0;
+			html = "";
+			html += '<div data-key="' + key + '" class="row properties">' +
+				'<div class="col-xs-5"><input type="text" value="" class="form-control" id="param_name" placeholder="Name" name="advanced['+clicked+'][' + key + '][param_name]"></div>' +
+				'<div class="col-xs-6"><input type="text" value="" class="form-control" id="param_value" placeholder="Value" name="advanced['+clicked+'][' + key + '][param_value]"></div>' +
+				'<div class="col-xs-1"><a class="action remove btn btn-danger glyphicon glyphicon-minus"></a></div>' +
+			'</div>';
+			$(html).insertBefore($(this).closest('.row'));
+		});
+
+		$('body').on('click', ".action.remove", function() {
+			$(this).closest('.row').remove();
+		})
+
+	});
+});
+</script>
