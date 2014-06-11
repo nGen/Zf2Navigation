@@ -1,7 +1,7 @@
 {
     "name": "ngen/zf2navigation",
     "description": "Dynamic Navigation System for Zend Framework 2",
-    "type": "Library and Management System",
+    "type": "Library",
 	"license": "GPL V2",
     "keywords": [
         "zf2",
