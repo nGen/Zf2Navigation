@@ -16,9 +16,10 @@
             "homepage": "http://mrnepal.com"
         }
     ],
-    "require": {
+    "require-dev": {
         "zf-commons/zfc-base": "dev-master",
-        "ngen/zfc": "dev-master"
+        "ngen/zfc": "dev-master",
+        "neilime/zf2-twb-bundle": "2.*@stable"
     },
     "autoload": {
         "psr-0": {
