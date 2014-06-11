@@ -1,11 +1,12 @@
 {
     "name": "ngen/zf2navigation",
-    "description": "Dynamic Navigation System of Zend Framework 2",
-    "type": "library",
+    "description": "Dynamic Navigation System for Zend Framework 2",
+    "type": "Library & Management System",
 	"license": "GPL V2",
     "keywords": [
         "zf2",
 		"ngen",
+        "dynamic",
         "navigation"
     ],
     "authors": [
@@ -16,6 +17,9 @@
         }
     ],
     "require": {
+        "zf-commons/zfc-base": "0.*",
+        "ngen/zfc": "dev-master",
+        "neilime/zf2-twb-bundle": "2.*@stable",
     },
     "autoload": {
         "psr-0": {

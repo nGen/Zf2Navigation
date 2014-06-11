@@ -7,6 +7,7 @@ use nGen\Zf2Navigation\NavigationManagement\Mapper\NavigationContainerMapper;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Stdlib\Hydrator\ClassMethods;
 
 class NavigationContainerMapperFactory implements FactoryInterface
 {
@@ -16,7 +17,8 @@ class NavigationContainerMapperFactory implements FactoryInterface
         $mapper = new NavigationContainerMapper();
         $mapper -> setDbAdapter($dbAdapter);
         $mapper -> setEntityPrototype($entity);
-        $mapper -> setHydrator(new \nGen\Zf2Navigation\NavigationManagement\Hydrator\StandardHydrator());
+
+        $mapper -> setHydrator(new ClassMethods());
         return $mapper;
     }
 }

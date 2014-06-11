@@ -6,6 +6,7 @@ use nGen\Zf2Navigation\NavigationManagement\Mapper\NavigationPageMapper;
 
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use Zend\Stdlib\Hydrator\ClassMethods;
 
 class NavigationPageMapperFactory implements FactoryInterface
 {
@@ -15,7 +16,7 @@ class NavigationPageMapperFactory implements FactoryInterface
         $mapper = new NavigationPageMapper();
         $mapper -> setDbAdapter($dbAdapter);
         $mapper -> setEntityPrototype($entity);
-        $mapper -> setHydrator(new \nGen\Zf2Navigation\NavigationManagement\Hydrator\StandardHydrator());
+        $mapper -> setHydrator(new ClassMethods());
         return $mapper;
     }
 }

@@ -11,7 +11,10 @@ class NavigationPageControllerFactory implements FactoryInterface
     {
         $realServiceLocator = $serviceLocator->getServiceLocator();
         $navigationPageService = $realServiceLocator->get('nGenZf2NavigationPageService');
-        $navigationContainerService = $realServiceLocator->get('nGenZf2NavigationContainerService');
-        return new NavigationPageController($navigationPageService, $navigationContainerService);
+        $navigationContainerService = $realServiceLocator->get('nGenZf2NavigationContainerService');        
+    	$config = $realServiceLocator -> get('Config');
+        $controllerRoute = $config['Zf2NavigationControllerRouteName'];
+        $pageRoute = $config['Zf2NavigationPageRouteName'];
+        return new NavigationPageController($navigationPageService, $navigationContainerService, $pageRoute, $controllerRoute);
     }
 }

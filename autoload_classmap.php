@@ -5,6 +5,8 @@ return array(
   'nGen\Zf2Navigation\NavigationManagement\Form\NavigationPageParamsFieldset'                       => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Form/NavigationPageParamsFieldset.php',
   'nGen\Zf2Navigation\NavigationManagement\Form\NavigationPageForm'                                 => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Form/NavigationPageForm.php',
   'nGen\Zf2Navigation\NavigationManagement\Form\NavigationContainerForm'                            => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Form/NavigationContainerForm.php',
+  'nGen\Zf2Navigation\NavigationManagement\InputFilter\NavigationContainerInputFilter'              => __DIR__ . '//src/Zf2Navigation/NavigationManagement/InputFilter/NavigationContainerInputFilter.php',
+  'nGen\Zf2Navigation\NavigationManagement\InputFilter\NavigationPageInputFilter'                   => __DIR__ . '//src/Zf2Navigation/NavigationManagement/InputFilter/NavigationPageInputFilter.php',
   'nGen\Zf2Navigation\NavigationManagement\Model\NavigationContainer'                               => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Model/NavigationContainer.php',
   'nGen\Zf2Navigation\NavigationManagement\Model\NavigationPage'                                    => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Model/NavigationPage.php',
   'nGen\Zf2Navigation\NavigationManagement\Controller\NavigationContainerController'                => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Controller/NavigationContainerController.php',

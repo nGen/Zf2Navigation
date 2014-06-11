@@ -17,14 +17,15 @@ class NavigationPageController extends AbstractActionController {
 	protected $viewData = array(
 		"title" => "Menu",
 		"pluralTitle" => "Menus",
-		"mainRouteName" => 'navigation/container',
-		"adminRouteName" => 'navigation/page'
 	);
 
-	public function __construct(NavigationPageService $mainService, NavigationContainerService $containerService) {
+	public function __construct(NavigationPageService $mainService, NavigationContainerService $containerService, $pageRoute, $controllerPage) {
 		$this -> mainService = $mainService;
 		$this -> containerService = $containerService;
 		$this -> sessionContainer = new Container('navigation');
+
+		$this -> viewData['mainRouteName'] = $pageRoute;
+		$this -> viewData['parentRouteName'] = $controllerPage;
 	}
 
 	public function getSessionMsg() {
@@ -46,7 +47,7 @@ class NavigationPageController extends AbstractActionController {
 				"type" => "danger", 
 				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
 			);
-			return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index'));			
+			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
 		}
 
 		$parent = $this -> params() -> fromRoute('parent', 0);
@@ -74,7 +75,7 @@ class NavigationPageController extends AbstractActionController {
 				"type" => "danger", 
 				"msg" => "Invalid menu name."
 			);
-			return $this -> redirect() -> toRoute($viewData['mainRouteName']);			
+			return $this -> redirect() -> toRoute($viewData['parentRouteName']);			
 		}
 		
 	}	
@@ -93,7 +94,7 @@ class NavigationPageController extends AbstractActionController {
 				"type" => "danger", 
 				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
 			);
-			return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index'));			
+			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
 		}
 
 		if($parent > 0) {
@@ -124,7 +125,7 @@ class NavigationPageController extends AbstractActionController {
 						"type" => "success", 
 						"msg" => $viewData['title']." \"{$data['title']}\" has been added."
 					);
-					return $this -> redirect() -> toRoute($viewData['adminRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
+					return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
 
 				} else {
 					$viewData['msg'] = array(
@@ -145,7 +146,7 @@ class NavigationPageController extends AbstractActionController {
 		$viewData['form'] = $form; 
 		$viewData['action'] = "add";
 		$viewModel = new ViewModel($viewData);
-		$viewModel -> setTemplate("application/navigation-page/form.phtml");
+		$viewModel -> setTemplate("n-gen/navigation-page/form.phtml");
 		return $viewModel;
 	}
     
@@ -164,7 +165,7 @@ class NavigationPageController extends AbstractActionController {
 				"type" => "danger", 
 				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
 			);
-			return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index'));			
+			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
 		}
 
 		//Parent
@@ -177,7 +178,7 @@ class NavigationPageController extends AbstractActionController {
 		//Id
         $id = (int) $this -> params() -> fromRoute('id', 0);
         if(!$id) {
-            return $this -> redirect() -> toRoute($this -> viewData['adminRouteName'], array(
+            return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array(
                 'action' => 'add'
             ));
         }
@@ -188,7 +189,7 @@ class NavigationPageController extends AbstractActionController {
 				"type" => "danger",
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
-			return $this -> redirect() -> toRoute($viewData['adminRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
+			return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
         }
 
         $temp = array(
@@ -249,7 +250,7 @@ class NavigationPageController extends AbstractActionController {
 						"type" => "success", 
 						"msg" => $viewData['title']." \"{$form_data['title']}\" has been updated."
 					);
-					return $this -> redirect() -> toRoute($viewData['adminRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
+					return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
 				} else {
 					$viewData['msg'] = array(
 						"type" => "danger",
@@ -269,7 +270,7 @@ class NavigationPageController extends AbstractActionController {
        	$viewData['form'] = $form;
 		$viewData['action'] = "edit";
 		$viewModel = new ViewModel($viewData);
-		$viewModel -> setTemplate("application/navigation-page/form.phtml");
+		$viewModel -> setTemplate("n-gen/navigation-page/form.phtml");
 		return $viewModel;
     }
 
@@ -294,7 +295,7 @@ class NavigationPageController extends AbstractActionController {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     }
 
 public function enableAction() {
@@ -318,7 +319,7 @@ public function enableAction() {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     }
     
     public function disableAction() {
@@ -342,6 +343,6 @@ public function enableAction() {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     }        
 }

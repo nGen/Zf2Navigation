@@ -19,15 +19,15 @@ class NavigationContainerController extends AbstractActionController {
 	protected $viewData = array(
 		"title" => "Navigation Menu",
 		"pluralTitle" => "Navigation Menus",
-		"adminRouteName" => 'navigation/default',
-		"subRouteName" => 'navigation/page'
 	);
 
-	public function __construct(NavigationContainerService $mainService, NavigationPageService $pageService, $project_base_path) {
+	public function __construct(NavigationContainerService $mainService, NavigationPageService $pageService, $project_base_path, $mainRouteName, $subRouteName) {
 		$this -> mainService = $mainService;
 		$this -> pageService = $pageService;
 		$this -> sessionContainer = new Container('navigation');
 		$this -> project_base_path = $project_base_path;
+		$this -> viewData['mainRouteName'] = $mainRouteName;
+		$this -> viewData['subRouteName'] = $subRouteName;
 	}
 
 	public function getSessionMsg() {
@@ -70,7 +70,7 @@ class NavigationContainerController extends AbstractActionController {
 						"type" => "success", 
 						"msg" => $this -> viewData['title']." \"{$data['title']}\" has been added."
 					);
-					return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+					return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
 				} else {
 					$this -> viewData['msg'] = array(
 						"type" => "danger",
@@ -91,7 +91,7 @@ class NavigationContainerController extends AbstractActionController {
     public function editAction() {
         $id = (int) $this -> params() -> fromRoute('id', 0);
         if(!$id) {
-            return $this -> redirect() -> toRoute($this -> viewData['adminRouteName'], array(
+            return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array(
                 'action' => 'add'
             ));
         }
@@ -102,7 +102,7 @@ class NavigationContainerController extends AbstractActionController {
 				"type" => "danger",
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
-			return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);        	
+			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);        	
         }
 
         $form = new NavigationContainerForm(true);
@@ -130,7 +130,7 @@ class NavigationContainerController extends AbstractActionController {
 						"type" => "success", 
 						"msg" => $this -> viewData['title']." \"{$form_data['title']}\" has been updated."
 					);
-					return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+					return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
 				} else {
 					$this -> viewData['msg'] = array(
 						"type" => "danger",
@@ -171,7 +171,7 @@ class NavigationContainerController extends AbstractActionController {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     }
 
     public function enableAction() {
@@ -195,7 +195,7 @@ class NavigationContainerController extends AbstractActionController {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     }
     
     public function disableAction() {
@@ -219,7 +219,7 @@ class NavigationContainerController extends AbstractActionController {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
     } 
 
     private function menuRecursor($menu_id, $parent = 0, $depth = 1) {
@@ -253,17 +253,22 @@ class NavigationContainerController extends AbstractActionController {
 			$subLists = $this -> menuRecursor($menu_id, $list['id'], $depth + 1);
 			$code = "";
 			foreach($list as $key => $value) {
-				if(!is_array($value)) {
-					$code .= (strlen($value) ? "'".$key."' => '".$value."', " : '');
+				if(empty($value) || !$value || $value == "_self") {
+					continue;
+				} elseif(!is_array($value)) {
+					if($value === true) { $value = 'true'; }
+					elseif($value === false) { $value = 'false'; }
+					else { $value = "'$value'"; }
+					$code .= (strlen($value) ? "'".$key."' => {$value}, " : '');
 				} else {
-					$code .= "'".$key."' => array(";
 					if(count($value)) { 
+						$code .= "'".$key."' => array(";
 						foreach($value as $k => $v) {
 							$vValues = array_values($v);
 							$code .= "'".$vValues[0]."' => '".$vValues[1]."', ";
 						}
+						$code .= '), ';
 					}
-					$code .= '), ';
 				}
 			}
 
@@ -350,13 +355,13 @@ CODE;
 				"type" => "success", 
 				"msg" => ceil($bytes / 1024)." KB of Menu Configuration generated."
 			);
-			return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);
+			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
 		} else {
 			$this -> sessionContainer -> msg = array(
 				"type" => "danger", 
 				"msg" => "Error encountered while generating."
 			); 
-			return $this -> redirect() -> toRoute($this -> viewData['adminRouteName']);			
+			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);			
 		}
 		
     }
