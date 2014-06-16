@@ -18,7 +18,7 @@ $route_params = array('container' => $container, 'action' => $action, 'parent' =
 if($action == 'edit') {
 	$route_params['id'] = $id;
 }
-$form -> setAttribute('action', $this -> url($adminRouteName, $route_params));
+$form -> setAttribute('action', $this -> url($mainRouteName, $route_params));
 $form -> prepare();
 
 echo $this -> form() -> openTag($form);
@@ -200,7 +200,10 @@ echo $this -> form() -> closeTag();
 		padding: 8px 22px 9px 9px;
 	}
 </style>
-<script>
+
+<?php 
+
+$script = <<<SCRIPT
 jQuery(function($) {
 	$(function() {
 		advanced_container = $('.advanced_container');
@@ -241,4 +244,6 @@ jQuery(function($) {
 
 	});
 });
-</script>
+SCRIPT;
+
+$this -> inlineScript() -> appendScript($script);

@@ -12,7 +12,7 @@ if(isset($msg)) {
 HTML;
 }
 
-$form -> setAttribute('action', $this -> url($adminRouteName, array('action' => 'add')));
+$form -> setAttribute('action', $this -> url($mainRouteName, array('action' => 'add')));
 $form -> prepare();
 
 echo $this -> form() -> openTag($form);
