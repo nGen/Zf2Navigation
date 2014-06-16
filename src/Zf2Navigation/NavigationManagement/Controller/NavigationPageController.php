@@ -134,7 +134,6 @@ class NavigationPageController extends AbstractActionController {
 					);
 				}
 			} else {
-				$message = $form -> getMessages(); var_dump($message);
 				$viewData['msg'] = array(
 					"type" => "danger",
 					"msg" => "Errors were encountered in the form you submitted."

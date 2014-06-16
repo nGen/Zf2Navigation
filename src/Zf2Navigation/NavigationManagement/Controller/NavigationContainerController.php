@@ -320,7 +320,6 @@ return array(
         'factories' => array(
 CODE;
 		foreach($menus as $menu) {
-			//var_dump($menu); exit;
 			$code .= <<<CODE
 
 			'navigation_{$menu['name']}_menu' => function(\$serviceLocator) {
