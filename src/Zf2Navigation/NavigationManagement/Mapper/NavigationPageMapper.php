@@ -37,11 +37,11 @@ class NavigationPageMapper extends ExtendedAbstractDbMapper {
     } 
 
     public function fetchAllEnabled($paginated = false, $menu_id, $parent) {
-        return $this -> fetchAll($paginated, array("status" => true, "menu_id" => $menu_id, "parent" => $parent));
+        return $this -> fetchAll($paginated, array("active" => true, "menu_id" => $menu_id, "parent" => $parent));
     }
 
     public function fetchAllDisabled($paginated = false, $menu_id, $parent) {
-        return $this -> fetchAll($paginated, array("status" => false, "menu_id" => $menu_id, "parent" => $parent));
+        return $this -> fetchAll($paginated, array("active" => false, "menu_id" => $menu_id, "parent" => $parent));
     }    
     
     public function delete($id, $where = null, $tableName = null) {
@@ -56,7 +56,7 @@ class NavigationPageMapper extends ExtendedAbstractDbMapper {
         if (!$where) {
             $where = 'id = ' . $id;
         }
-        $result = parent::updateField(array("status" => true), $where, $tableName = null);
+        $result = parent::updateField(array("active" => true), $where, $tableName = null);
         return $result;
     }
 
@@ -64,7 +64,7 @@ class NavigationPageMapper extends ExtendedAbstractDbMapper {
         if (!$where) {
             $where = 'id = ' . $id;
         }
-        $result = parent::updateField(array("status" => false), $where, $tableName = null);
+        $result = parent::updateField(array("active" => false), $where, $tableName = null);
         return $result;
     }       
 	

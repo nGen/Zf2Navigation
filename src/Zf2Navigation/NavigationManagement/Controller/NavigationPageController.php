@@ -134,6 +134,7 @@ class NavigationPageController extends AbstractActionController {
 					);
 				}
 			} else {
+				//$message = $form -> getMessages(); var_dump($message);
 				$viewData['msg'] = array(
 					"type" => "danger",
 					"msg" => "Errors were encountered in the form you submitted."
@@ -178,7 +179,9 @@ class NavigationPageController extends AbstractActionController {
         $id = (int) $this -> params() -> fromRoute('id', 0);
         if(!$id) {
             return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array(
-                'action' => 'add'
+                'action' => 'add',
+                'container' => $this -> params() -> fromRoute('container'), 
+                'parent' => $this -> params() -> fromRoute('parent', 0)
             ));
         }
 
@@ -294,7 +297,7 @@ class NavigationPageController extends AbstractActionController {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
     }
 
 public function enableAction() {
@@ -318,7 +321,7 @@ public function enableAction() {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
     }
     
     public function disableAction() {
@@ -342,6 +345,6 @@ public function enableAction() {
 				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
 			);
 		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
     }        
 }
