@@ -9,8 +9,8 @@ return array(
         'invokables' => array(
         ),
         'factories' => array(           
-            'nGenZf2NavigationNavigationContainerController' => 'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationContainerControllerFactory',
-            'nGenZf2NavigationNavigationPageController' => 'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationPageControllerFactory',
+            'nGenZf2NavigationContainerController' => 'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationContainerControllerFactory',
+            'nGenZf2NavigationPageController' => 'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationPageControllerFactory',
         ),
     ),
     'service_manager' => array(
