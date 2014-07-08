@@ -277,7 +277,7 @@ class NavigationContainerController extends AbstractActionController {
 				$tmenu .= "'pages' => array(".$subLists['menu']."),";
 			}
 			$tbreadcrumbs = $code;
-			if(strlen($subLists['menu'])) {
+			if(strlen($subLists['breadcrumbs'])) {
 				$tbreadcrumbs .= "'pages' => array(".$subLists['breadcrumbs']."),";
 			}
 			$tsitemap = $code;
