@@ -37,7 +37,7 @@ class NavigationContainerForm extends Form
                 'id'    => 'name'
             ),
             'options' => array(
-                'label' => 'name',
+                'label' => 'Name',
             ),
         ));
         

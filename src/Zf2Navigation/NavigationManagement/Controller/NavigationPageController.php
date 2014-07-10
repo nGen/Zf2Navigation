@@ -1,83 +1,139 @@
 <?php
 namespace nGen\Zf2Navigation\NavigationManagement\Controller;
 
-use Zend\View\Model\ViewModel;
-use Zend\Session\Container;
+use nGen\Zf2Entity\Controller\EntityStatisticsController;
 use nGen\Zf2Navigation\NavigationManagement\Form\NavigationPageForm;
 use nGen\Zf2Navigation\NavigationManagement\InputFilter\NavigationPageInputFilter;
 use nGen\Zf2Navigation\NavigationManagement\Service\NavigationPageService;
 use nGen\Zf2Navigation\NavigationManagement\Service\NavigationContainerService;
-use Zend\Mvc\Controller\AbstractActionController;
 
-class NavigationPageController extends AbstractActionController {
-	protected $mainService;
+class NavigationPageController extends EntityStatisticsController {
 	protected $containerService;
-	protected $sessionContainer;
 
 	protected $viewData = array(
 		"title" => "Menu",
 		"pluralTitle" => "Menus",
+		'manager' => array(
+			'records' => array(
+				'links' => array(
+					array(
+						'label' => 'Add Submenu',
+						'route' => array(
+							'name' => array(
+								'type' => 'from_view',
+								'value' => 'mainRouteName',
+							),
+							'params' => array(
+								'action' => array(
+									'type' => 'static',
+									'value' => 'add',
+								),
+								'container' => array(
+									'type' => 'from_view',
+									'value' => 'container',
+								),
+								'parent' => array(
+									'type' => 'from_record',
+									'value' => 'id',									
+								),
+								'id' => array(
+									'type' => 'unset'
+								),
+							),
+							'merge_current_params' => false,
+						),
+					),
+					array(
+						'label' => 'List Submenu',
+						'route' => array(
+							'name' => array(
+								'type' => 'from_view',
+								'value' => 'mainRouteName',
+							),
+							'params' => array(
+								'action' => array(
+									'type' => 'static',
+									'value' => 'index',
+								),
+								'container' => array(
+									'type' => 'from_view',
+									'value' => 'container',
+								),
+								'parent' => array(
+									'type' => 'from_record',
+									'value' => 'id',									
+								),
+								'id' => array(
+									'type' => 'unset'
+								),
+							),
+							'merge_current_params' => false,
+						),
+					),
+				),
+			),
+		),		
 	);
 
 	public function __construct(NavigationPageService $mainService, NavigationContainerService $containerService, $pageRoute, $controllerPage) {
+		parent::__construct();
 		$this -> mainService = $mainService;
 		$this -> containerService = $containerService;
-		$this -> sessionContainer = new Container('navigation');
 
 		$this -> viewData['mainRouteName'] = $pageRoute;
 		$this -> viewData['parentRouteName'] = $controllerPage;
 	}
 
-	public function getSessionMsg() {
-		if(is_array($this -> sessionContainer -> msg)) {
-			$msg = $this -> sessionContainer -> msg;
-			$this -> sessionContainer -> msg = null; //Remove it
-			return $msg;
+	protected function init() {
+		$viewData = $this -> viewData;
+		$container = $this -> params() -> fromRoute('container');
+		$container_id = $this -> containerService -> fetchIdByName($container);
+		if($container_id === false) {
+			$this -> messenger -> addErrorMessage("Invalid {$viewData['title']} \"{$container}\".");
+			return $this -> redirectToMain();
 		}
-			return null;
-	}
 
-	public function indexAction() {
+		$parent = $this -> params() -> fromRoute('parent', 0);
+		$where['menu_id'] = $container_id;
+		$where['parent'] = $parent;
+		$this -> mainService -> setDefaultWhereRestriction($where);
+		return true;
+	}	
+
+	protected function indexInit() {
 		$viewData = $this -> viewData;
 
 		$container = $this -> params() -> fromRoute('container');
 		$container_id = $this -> containerService -> fetchIdByName($container);
 		if($container_id === false) {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger", 
-				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
-			);
-			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
+			$this -> messenger -> addErrorMessage("Invalid {$viewData['title']} \"{$container}\".");
+			return $this -> redirectToMain();
 		}
 
 		$parent = $this -> params() -> fromRoute('parent', 0);
 		if($parent > 0) {
 			$parent_row = $this -> mainService -> fetchAsArray($parent);
-			$viewData['subTitle'] = $parent_row['title']; 
-		}
-		$viewData['pluralTitle'] = "Menu <small>$container</small>";
-		
-		if($container) {
-			$paginatedEntries = $this -> mainService -> fetchAllPaginated($container_id, $parent);
-			$paginatedEntries -> setCurrentPageNumber((int) $this->params() -> fromQuery('page', 1));
-			$paginatedEntries -> setItemCountPerPage(10);
-			
-			$viewData['rows'] = $paginatedEntries;
-			$viewData['msg'] = $this -> getSessionMsg();
-			$viewData['container'] = $this -> params() -> fromRoute('container');
-			
-			if($parent >= 0) {
-				$viewData['parent'] = $parent;
-			}
-			return new ViewModel($viewData);
+			$viewData['subTitle'] = 'Parent: '.$parent_row['title']; 
 		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger", 
-				"msg" => "Invalid menu name."
-			);
-			return $this -> redirect() -> toRoute($viewData['parentRouteName']);			
+			$parent = '0';
 		}
-		
+
+		$viewData['route']['params']['parent'] = $parent;
+		$viewData['pluralTitle'] = "Menu <small>$container</small>";
+		$viewData['container'] = $container;
+
+		$where['menu_id'] = $container_id;
+		$where['parent'] = $parent;
+		$this -> mainService -> setDefaultWhereRestriction($where);
+		$this -> viewData = $viewData;
+		return true;
+	}
+
+	public function indexAction() {
+		$initStatus = $this -> indexInit();
+		if($initStatus  !== true) { return $initStatus; }
+
+		return $this -> DefaultIndexAction();
 	}	
 
 	public function addAction() {
@@ -90,11 +146,8 @@ class NavigationPageController extends AbstractActionController {
 		$container = $this -> params() -> fromRoute('container');
 		$container_id = $this -> containerService -> fetchIdByName($container);
 		if($container_id === false) {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger", 
-				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
-			);
-			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
+			$this -> messenger -> addErrorMessage("Invalid {$viewData['title']} \"{$container}\".");
+			return $this -> redirectToMain();
 		}
 
 		if($parent > 0) {
@@ -121,31 +174,22 @@ class NavigationPageController extends AbstractActionController {
 
 				$status = $this -> mainService -> save($data);
 				if($status === true) {
-					$this -> sessionContainer -> msg = array(
-						"type" => "success", 
-						"msg" => $viewData['title']." \"{$data['title']}\" has been added."
-					);
+					$this -> messenger -> addSuccessMessage($viewData['title']." \"{$data['title']}\" has been added.");
 					return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
 
 				} else {
-					$viewData['msg'] = array(
-						"type" => "danger",
-						"msg" => "Errors encountered. Please try again."
-					);
+					$this -> messenger -> addErrorMessage("Errors encountered. Please try again.");
 				}
 			} else {
 				//$message = $form -> getMessages(); var_dump($message);
-				$viewData['msg'] = array(
-					"type" => "danger",
-					"msg" => "Errors were encountered in the form you submitted."
-				);
+				$this -> messenger -> addErrorMessage("Errors were encountered in the form you submitted.");
 			}
 		}
 		$viewData['parent'] = $parent;
 		$viewData['container'] = $this -> params() -> fromRoute('container');
 		$viewData['form'] = $form; 
 		$viewData['action'] = "add";
-		$viewModel = new ViewModel($viewData);
+		$viewModel = $this -> getViewModel($viewData);
 		$viewModel -> setTemplate("n-gen/navigation-page/form.phtml");
 		return $viewModel;
 	}
@@ -161,11 +205,8 @@ class NavigationPageController extends AbstractActionController {
 		$container = $this -> params() -> fromRoute('container');
 		$container_id = $this -> containerService -> fetchIdByName($container);
 		if($container_id === false) {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger", 
-				"msg" => "Invalid {$viewData['title']} \"{$container}\"."
-			);
-			return $this -> redirect() -> toRoute($viewData['parentRouteName'], array('action' => 'index'));			
+			$this -> messenger -> addErrorMessage("Invalid {$viewData['title']} \"{$container}\".");
+			return $this -> redirectToMain();
 		}
 
 		//Parent
@@ -185,13 +226,21 @@ class NavigationPageController extends AbstractActionController {
             ));
         }
 
+        // Lock Related
+        $isLocked = $this -> mainService -> isLocked($id);
+        if($isLocked) {
+        	if(!$this -> mainService -> isCurrentUserTheLocker($id)) {
+        		$this -> messenger -> addErrorMessage("{$this -> viewData['title']} with id: $id is locked. Other user might be updating them.");
+        		return $this -> redirectToMain();
+        	}
+        } else {
+        	$this -> mainService -> lock($id);
+        }     
+
         $data = $this -> mainService -> fetchAsArray($id);
         if($data === false) {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-			return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
+			$this -> messenger -> addErrorMessage("{$this -> viewData['title']} with id: $id was not found. It may have already been deleted.");
+			return $this -> redirectToMain();
         }
 
         $temp = array(
@@ -208,6 +257,7 @@ class NavigationPageController extends AbstractActionController {
     	$data['properties'] = json_decode($data['properties'], true);
     	$data['params'] = json_decode($data['params'], true);
     	$data = array_merge($temp, array("advanced" => $data));
+    	
     	//Findout if Advanced options was selected
     	if(
     		strlen($data['advanced']['route']) || 
@@ -244,26 +294,16 @@ class NavigationPageController extends AbstractActionController {
 				$form_data['parent'] = $parent;
 				$form_data['menu_id'] = $container_id;
 
-//				var_dump($form_data); exit;
-
 				$status = $this -> mainService -> save($form_data);
 				if($status === true) {
-					$this -> sessionContainer -> msg = array(
-						"type" => "success", 
-						"msg" => $viewData['title']." \"{$form_data['title']}\" has been updated."
-					);
-					return $this -> redirect() -> toRoute($viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
+					$this -> mainService -> unlock($id);
+					$this -> messenger -> addSuccessMessage($viewData['title']." \"{$form_data['title']}\" has been updated.");
+					return $this -> redirectToMain();
 				} else {
-					$viewData['msg'] = array(
-						"type" => "danger",
-						"msg" => "Errors encountered. Please try again."
-					);
+					$this -> messenger -> addErrorMessage("Errors encountered. Please try again.");
 				}
 			} else {
-				$viewData['msg'] = array(
-					"type" => "danger",
-					"msg" => "Errors were encountered in the form you submitted."
-				);
+				$this -> messenger -> addErrorMessage("Errors were encountered in the form you submitted.");
 			}
         }
         $viewData['parent'] = $parent;
@@ -271,80 +311,8 @@ class NavigationPageController extends AbstractActionController {
        	$viewData['id'] = $id;
        	$viewData['form'] = $form;
 		$viewData['action'] = "edit";
-		$viewModel = new ViewModel($viewData);
+		$viewModel = $this -> getViewModel($viewData);
 		$viewModel -> setTemplate("n-gen/navigation-page/form.phtml");
 		return $viewModel;
-    }
-
-	public function deleteAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> delete($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been deleted."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while deleting {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
-    }
-
-public function enableAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> enable($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been enabled."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while enabling {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
-    }
-    
-    public function disableAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> disable($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been disabled."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while disabling {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName'], array('action' => 'index', 'container' => $this -> params() -> fromRoute('container'), 'parent' => $this -> params() -> fromRoute('parent', 0) ));
-    }        
+    }     
 }

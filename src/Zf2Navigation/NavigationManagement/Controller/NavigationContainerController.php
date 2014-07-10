@@ -1,53 +1,72 @@
 <?php
 namespace nGen\Zf2Navigation\NavigationManagement\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
-use Zend\Session\Container;
+use nGen\Zf2Entity\Controller\EntityStatisticsController;
 use nGen\Zf2Navigation\NavigationManagement\Form\NavigationContainerForm;
 use nGen\Zf2Navigation\NavigationManagement\InputFilter\NavigationContainerInputFilter;
 use nGen\Zf2Navigation\NavigationManagement\Service\NavigationContainerService;
 use nGen\Zf2Navigation\NavigationManagement\Service\NavigationPageService;
-use nGen\Zf2Navigation\NavigationManagement\Service\TripTypeService;
 
-class NavigationContainerController extends AbstractActionController {
-	protected $mainService;
+class NavigationContainerController extends EntityStatisticsController {
 	protected $pageService;
-	protected $sessionContainer;
 	protected $project_base_path;
 
 	protected $viewData = array(
 		"title" => "Navigation Menu",
 		"pluralTitle" => "Navigation Menus",
+		'manager' => array(
+			'title_field' => array(
+				'active' => true,
+				'details' => array(
+					'label' => 'Menu',
+					'field' => 'name'
+				),
+			),
+		    'modes' => array(
+		        'active' => array(
+					'links' => array(
+						'manage-links' => array(
+							'label' => 'Manage Links',
+							'route' => array(
+								'name' => array('type' => 'from_view', 'value' => 'subRouteName',),
+								'params' => array(
+									'action' => array('type' => 'static', 'value' => 'index',),
+									'container' => array('type' => 'from_record', 'value' => 'name',),
+									'parent' => array('type' => 'static', 'value' => '0',),
+									'id' => array('type' => 'unset'),
+								),
+								'merge_current_params' => false,
+							),
+						),
+						'add-links' => array(
+							'label' => 'Add Links',
+							'route' => array(
+								'name' => array('type' => 'from_view', 'value' => 'subRouteName',),
+								'params' => array(
+									'action' => array('type' => 'static', 'value' => 'add',),
+									'container' => array('type' => 'from_record', 'value' => 'name',),
+									'parent' => array('type' => 'static', 'value' => '0',),
+									'id' => array('type' => 'unset'),
+								),
+								'merge_current_params' => false,
+							),
+						),
+					),
+				),
+			),
+		),		
 	);
 
 	public function __construct(NavigationContainerService $mainService, NavigationPageService $pageService, $project_base_path, $mainRouteName, $subRouteName) {
+		parent::__construct();
 		$this -> mainService = $mainService;
 		$this -> pageService = $pageService;
-		$this -> sessionContainer = new Container('navigation');
 		$this -> project_base_path = $project_base_path;
 		$this -> viewData['mainRouteName'] = $mainRouteName;
 		$this -> viewData['subRouteName'] = $subRouteName;
 	}
 
-	public function getSessionMsg() {
-		if(is_array($this -> sessionContainer -> msg)) {
-			$msg = $this -> sessionContainer -> msg;
-			$this -> sessionContainer -> msg = null; //Remove it
-			return $msg;
-		}
-		return null;
-	}
-
-	public function indexAction() {
-		$paginatedEntries = $this -> mainService -> fetchAllPaginated();
-		$paginatedEntries -> setCurrentPageNumber((int) $this->params() -> fromQuery('page', 1));
-		$paginatedEntries -> setItemCountPerPage(10);
-		
-		$this -> viewData['rows'] = $paginatedEntries;
-		$this -> viewData['msg'] = $this -> getSessionMsg();
-		return new ViewModel($this -> viewData);
-	}
+	protected function init() { return true; }
 
 	public function addAction() {
 
@@ -61,31 +80,20 @@ class NavigationContainerController extends AbstractActionController {
 
 			if($form -> isValid()) {
 				$data = $form -> getData();
-				$data['added_time'] = date("Y-m-d H:i:s");
-				$data['modified_time'] = date("Y-m-d H:i:s");
 
 				$status = $this -> mainService-> save($data);
 				if($status === true) {
-					$this -> sessionContainer -> msg = array(
-						"type" => "success", 
-						"msg" => $this -> viewData['title']." \"{$data['title']}\" has been added."
-					);
-					return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+					$this -> messenger -> addSuccessMessage($this -> viewData['title']." \"{$data['name']}\" has been added.");
+					return $this -> redirectToMain();
 				} else {
-					$this -> viewData['msg'] = array(
-						"type" => "danger",
-						"msg" => "Errors encountered. Please try again."
-					);
+					$this -> messenger -> addErrorMessage("Errors encountered. Please try again.");
 				}
 			} else {
-				$this -> viewData['msg'] = array(
-					"type" => "danger",
-					"msg" => "Errors were encountered in the form you submitted."
-				);
+				$this -> messenger -> addErrorMessage("Errors were encountered in the form you submitted.");
 			}
 		}
 		$this -> viewData['form'] = $form; 
-		return new ViewModel($this -> viewData);
+		return $this -> getViewModel();
 	}
     
     public function editAction() {
@@ -96,13 +104,21 @@ class NavigationContainerController extends AbstractActionController {
             ));
         }
 
+        // Lock Related
+        $isLocked = $this -> mainService -> isLocked($id);
+        if($isLocked) {
+        	if(!$this -> mainService -> isCurrentUserTheLocker($id)) {
+        		$this -> messenger -> addErrorMessage("{$this -> viewData['title']} with id: $id is locked. Other user might be updating them.");
+        		return $this -> redirectToMain();
+        	}
+        } else {
+        	$this -> mainService -> lock($id);
+        }        
+
         $data = $this -> mainService -> fetchAsArray($id);
         if($data === false) {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);        	
+			$this -> messenger -> addErrorMessage("{$this -> viewData['title']} with id: $id was not found. It may have already been deleted.");
+			return $this -> redirectToMain();        	
         }
 
         $form = new NavigationContainerForm(true);
@@ -117,113 +133,29 @@ class NavigationContainerController extends AbstractActionController {
 			
 			if($form -> isValid()) {
 				$form_data = $form -> getData();
-				$form_data['added_time'] = $data['added_time'];
-				$form_data['modified_time'] = date("Y-m-d H:i:s");
-				
-				if(!strlen($form_data['intro_image']) > 0) {
-					$form_data['intro_image'] = $data['intro_image'];
-				}
 
 				$status = $this -> mainService -> save($form_data);
 				if($status === true) {
-					$this -> sessionContainer -> msg = array(
-						"type" => "success", 
-						"msg" => $this -> viewData['title']." \"{$form_data['title']}\" has been updated."
-					);
-					return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+					$this -> mainService -> unlock($id);
+					$this -> messenger -> addSuccessMessage($this -> viewData['title']." \"{$form_data['name']}\" has been updated.");
+					return $this -> redirectToMain();
 				} else {
-					$this -> viewData['msg'] = array(
-						"type" => "danger",
-						"msg" => "Errors encountered. Please try again."
-					);
+					$this -> messenger -> addErrorMessage("Errors encountered. Please try again.");
 				}
 			} else {
-				$this -> viewData['msg'] = array(
-					"type" => "danger",
-					"msg" => "Errors were encountered in the form you submitted."
-				);
+				$this -> messenger -> addErrorMessage("Errors were encountered in the form you submitted.");
 			}
         }
 
        	$this -> viewData['id'] = $id;
        	$this -> viewData['form'] = $form;
-        return new ViewModel($this -> viewData);
+        return $this -> getViewModel();
     }
-
-	public function deleteAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> delete($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been deleted."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while deleting {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
-    }
-
-    public function enableAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> enable($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been enabled."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while enabling {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
-    }
-    
-    public function disableAction() {
-    	$id = (int) $this -> params() -> fromRoute('id', 0);
-        if($id > 0 && $this -> mainService -> fetch($id) !== false) {
-    		$response = $this -> mainService -> disable($id);
-    		if($response === true) {
-				$this -> sessionContainer -> msg = array(
-					"type" => "success", 
-					"msg" => $this -> viewData['title']." id: $id has been disabled."
-				); 
-			} else {
-				$this -> sessionContainer -> msg = array(
-					"type" => "danger",
-					"msg" => "Error encountered while disabling {$this -> viewData['title']} with id: $id."
-				);
-			}
-		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger",
-				"msg" => "{$this -> viewData['title']} with id: $id was not found. It may have already been deleted."
-			);
-		}
-		return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
-    } 
 
     private function menuRecursor($menu_id, $parent = 0, $depth = 1) {
-		$lists = $this -> pageService -> fetchAllAsArray($menu_id, $parent);
+    	$where['menu_id'] = $menu_id;
+    	$where['parent'] = $parent;
+		$lists = $this -> pageService -> fetchAllActiveAsArray($where);
 		$menu = "";
 		$breadcrumbs = "";
 		$sitemap = "";
@@ -242,11 +174,11 @@ class NavigationContainerController extends AbstractActionController {
 			$onBreadcrumbs = (boolean)$list['breadcrumbs'];
 			$onSitemap = (boolean)$list['sitemap'];
 			$list['reset_params'] = (boolean)$list['reset_params'];
-			$list['active'] = (boolean)$list['active'];
+			$list['active'] = (boolean)$list['status'];
 			$list['visible'] = (boolean)$list['visible'];
 			$list['params'] = json_decode($list['params'], true);
 			$list['properties'] = json_decode($list['properties'], true);
-			$list['order'] = $list['position'];
+			$list['order'] = $list['ordering'];
 
 			//Unneeded fields for menu
 			unset($list['menu_id'], $list['menu'], $list['breadcrumbs'], $list['sitemap'], $list['order'], $list['added_time'], $list['modified_time'], $list['parent']);	
@@ -294,10 +226,14 @@ class NavigationContainerController extends AbstractActionController {
     }
 
     public function generateAction() {
-    	$file = $this -> project_base_path.'/config/autoload/nav.global.php';
+    	$file = './config/autoload/nav.global.php';
+    	if(!is_writable($file)) {
+    		$this -> messenger -> addErrorMessage("Navigation configuartion file \"config/autoload/nav.global.php\" is not writable."); 
+    		return $this -> redirectToMain();
+    	}
 
     	$code = "";
-		$menus = $this -> mainService -> fetchAllAsArray();
+		$menus = $this -> mainService -> fetchAllActiveAsArray();
 		foreach($menus as $menu) {
 			$code_array = $this -> menuRecursor($menu['id']);
 			$code .= <<<CODE
@@ -350,18 +286,11 @@ CODE;
 		$status = file_put_contents($file, $code);
 		if($status > 1) {
 			$bytes = $status;
-			$this -> sessionContainer -> msg = array(
-				"type" => "success", 
-				"msg" => ceil($bytes / 1024)." KB of Menu Configuration generated."
-			);
-			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);
+			$this -> messenger -> addSuccessMessage(ceil($bytes / 1024)." KB of Menu Configuration generated.");
 		} else {
-			$this -> sessionContainer -> msg = array(
-				"type" => "danger", 
-				"msg" => "Error encountered while generating."
-			); 
-			return $this -> redirect() -> toRoute($this -> viewData['mainRouteName']);			
+			$this -> messenger -> addErrorMessage("Error encountered while generating."); 			
 		}
+		return $this -> redirectToMain();
 		
     }
 }

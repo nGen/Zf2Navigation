@@ -1,3 +1,5 @@
+-- --------------------------------------------------------
+
 --
 -- Table structure for table `navigation_container`
 --
@@ -6,9 +8,8 @@ DROP TABLE IF EXISTS `navigation_container`;
 CREATE TABLE IF NOT EXISTS `navigation_container` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
-  `status` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -32,7 +33,6 @@ CREATE TABLE IF NOT EXISTS `navigation_pages` (
   `action` varchar(50) DEFAULT NULL,
   `params` tinytext,
   `reset_params` tinyint(1) DEFAULT NULL,
-  `active` tinyint(1) NOT NULL,
   `visible` tinyint(1) DEFAULT NULL,
   `target` varchar(15) DEFAULT NULL,
   `rel` tinytext,
@@ -41,18 +41,6 @@ CREATE TABLE IF NOT EXISTS `navigation_pages` (
   `properties` tinytext NOT NULL,
   `position` int(11) DEFAULT NULL,
   `parent` int(11) DEFAULT NULL,
-  `added_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `modified_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `menu_id` (`menu_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=89 ;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `navigation_pages`
---
-ALTER TABLE `navigation_pages`
-  ADD CONSTRAINT `navigation_pages_ibfk_1` FOREIGN KEY (`menu_id`) REFERENCES `navigation_container` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
