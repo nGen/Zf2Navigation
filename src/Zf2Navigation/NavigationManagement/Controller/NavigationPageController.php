@@ -14,60 +14,60 @@ class NavigationPageController extends EntityStatisticsController {
 		"title" => "Menu",
 		"pluralTitle" => "Menus",
 		'manager' => array(
-			'records' => array(
-				'links' => array(
-					array(
-						'label' => 'Add Submenu',
-						'route' => array(
-							'name' => array(
-								'type' => 'from_view',
-								'value' => 'mainRouteName',
-							),
-							'params' => array(
-								'action' => array(
-									'type' => 'static',
-									'value' => 'add',
-								),
-								'container' => array(
+		    'modes' => array(
+		        'active' => array(
+					'links' => array(
+						"add_submenu" => array(
+							'label' => 'Add Submenu',
+							'route' => array(
+								'name' => array(
 									'type' => 'from_view',
-									'value' => 'container',
+									'value' => 'mainRouteName',
 								),
-								'parent' => array(
-									'type' => 'from_record',
-									'value' => 'id',									
-								),
-								'id' => array(
-									'type' => 'unset'
+								'params' => array(
+									'action' => array(
+										'type' => 'static',
+										'value' => 'add',
+									),
+									'container' => array(
+										'type' => 'from_view',
+										'value' => 'container',
+									),
+									'parent' => array(
+										'type' => 'from_record',
+										'value' => 'id',									
+									),
+									'id' => array(
+										'type' => 'unset'
+									),
 								),
 							),
-							'merge_current_params' => false,
 						),
-					),
-					array(
-						'label' => 'List Submenu',
-						'route' => array(
-							'name' => array(
-								'type' => 'from_view',
-								'value' => 'mainRouteName',
-							),
-							'params' => array(
-								'action' => array(
-									'type' => 'static',
-									'value' => 'index',
-								),
-								'container' => array(
+						"list_submenu" => array(
+							'label' => 'List Submenu',
+							'route' => array(
+								'name' => array(
 									'type' => 'from_view',
-									'value' => 'container',
+									'value' => 'mainRouteName',
 								),
-								'parent' => array(
-									'type' => 'from_record',
-									'value' => 'id',									
-								),
-								'id' => array(
-									'type' => 'unset'
+								'params' => array(
+									'action' => array(
+										'type' => 'static',
+										'value' => 'index',
+									),
+									'container' => array(
+										'type' => 'from_view',
+										'value' => 'container',
+									),
+									'parent' => array(
+										'type' => 'from_record',
+										'value' => 'id',									
+									),
+									'id' => array(
+										'type' => 'unset'
+									),
 								),
 							),
-							'merge_current_params' => false,
 						),
 					),
 				),

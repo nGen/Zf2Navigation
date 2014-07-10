@@ -15,6 +15,6 @@ class NavigationContainerControllerFactory implements FactoryInterface
         $config = $realServiceLocator -> get('Config');
         $controllerRoute = $config['Zf2NavigationControllerRouteName'];
         $pageRoute = $config['Zf2NavigationPageRouteName'];
-        return new NavigationContainerController($navigationContainerService, $navigationPageService, $config['base_path'], $controllerRoute, $pageRoute);
+        return new NavigationContainerController($navigationContainerService, $navigationPageService, $controllerRoute, $pageRoute);
     }
 }

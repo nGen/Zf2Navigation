@@ -35,7 +35,6 @@ class NavigationContainerController extends EntityStatisticsController {
 									'parent' => array('type' => 'static', 'value' => '0',),
 									'id' => array('type' => 'unset'),
 								),
-								'merge_current_params' => false,
 							),
 						),
 						'add-links' => array(
@@ -48,7 +47,6 @@ class NavigationContainerController extends EntityStatisticsController {
 									'parent' => array('type' => 'static', 'value' => '0',),
 									'id' => array('type' => 'unset'),
 								),
-								'merge_current_params' => false,
 							),
 						),
 					),
@@ -57,11 +55,10 @@ class NavigationContainerController extends EntityStatisticsController {
 		),		
 	);
 
-	public function __construct(NavigationContainerService $mainService, NavigationPageService $pageService, $project_base_path, $mainRouteName, $subRouteName) {
+	public function __construct(NavigationContainerService $mainService, NavigationPageService $pageService, $mainRouteName, $subRouteName) {
 		parent::__construct();
 		$this -> mainService = $mainService;
 		$this -> pageService = $pageService;
-		$this -> project_base_path = $project_base_path;
 		$this -> viewData['mainRouteName'] = $mainRouteName;
 		$this -> viewData['subRouteName'] = $subRouteName;
 	}
