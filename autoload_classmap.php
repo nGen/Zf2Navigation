@@ -13,6 +13,7 @@ return array(
   'nGen\Zf2Navigation\NavigationManagement\Controller\NavigationPageController'                     => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Controller/NavigationPageController.php',
   'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationPageControllerFactory'      => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Controller/Factory/NavigationPageControllerFactory.php',
   'nGen\Zf2Navigation\NavigationManagement\Controller\Factory\NavigationContainerControllerFactory' => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Controller/Factory/NavigationContainerControllerFactory.php',
+  'nGen\Zf2Navigation\NavigationManagement\Helper\NgenNavigation'                                   => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Helper/NgenNavigation.php',
   'nGen\Zf2Navigation\NavigationManagement\Service\NavigationPageServiceInterface'                  => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Service/NavigationPageServiceInterface.php',
   'nGen\Zf2Navigation\NavigationManagement\Service\NavigationContainerService'                      => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Service/NavigationContainerService.php',
   'nGen\Zf2Navigation\NavigationManagement\Service\NavigationPageService'                           => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Service/NavigationPageService.php',
@@ -24,5 +25,6 @@ return array(
   'nGen\Zf2Navigation\NavigationManagement\Mapper\NavigationPageMapper'                             => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Mapper/NavigationPageMapper.php',
   'nGen\Zf2Navigation\NavigationManagement\Mapper\Factory\NavigationContainerMapperFactory'         => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Mapper/Factory/NavigationContainerMapperFactory.php',
   'nGen\Zf2Navigation\NavigationManagement\Mapper\Factory\NavigationPageMapperFactory'              => __DIR__ . '//src/Zf2Navigation/NavigationManagement/Mapper/Factory/NavigationPageMapperFactory.php',
+  'nGen\Zf2Navigation\Navigation\Service\SeparatedNavigationProviderService'                        => __DIR__ . '//src/Zf2Navigation/Navigation/Service/SeparatedNavigationProviderService.php',
   'nGen\Zf2Navigation\Module'                                                                       => __DIR__ . '//Module.php',
 );

@@ -66,7 +66,6 @@ class NavigationContainerController extends EntityStatisticsController {
 	protected function init() { return true; }
 
 	public function addAction() {
-
 		$form = new NavigationContainerForm();
 		$form -> get('submit') -> setValue('Add');
 		$request = $this -> getRequest();
@@ -223,69 +222,99 @@ class NavigationContainerController extends EntityStatisticsController {
     }
 
     public function generateAction() {
-    	$file = './config/autoload/nav.global.php';
-    	if(!is_writable($file)) {
+    	//Check if global configuration file is writable
+    	$global_file = './config/autoload/nav.global.php';
+    	if(!is_writable($global_file)) {
     		$this -> messenger -> addErrorMessage("Navigation configuartion file \"config/autoload/nav.global.php\" is not writable."); 
     		return $this -> redirectToMain();
     	}
 
-    	$code = "";
+    	//Check if the navigation directory is writable
+		$directory = './config/navigation';
+    	if(!is_writable($directory)) {
+    		$this -> messenger -> addErrorMessage("Navigation configuartion directory \"config/navigation\" is not writable."); 
+    		return $this -> redirectToMain();
+    	}    	
+
+    	$global_menu_config = "";
 		$menus = $this -> mainService -> fetchAllActiveAsArray();
 		foreach($menus as $menu) {
 			$code_array = $this -> menuRecursor($menu['id']);
-			$code .= <<<CODE
-
-		'{$menu['name']}_menu' => array({$code_array['menu']}
-		),
-		'{$menu['name']}_breadcrumbs' => array({$code_array['breadcrumbs']}
-		),
-		'{$menu['name']}_sitemap' => array({$code_array['sitemap']}
-		),
+			if($menu['separate_config'] === '1') {
+				foreach($code_array as $config_key => $configuration) {
+					$separate_config_file = $directory."/".$menu['name']."_".$config_key.".php";
+					$separate_config_code = <<<CODE
+<?PHP					
+return array(
+	{$configuration}
+);
 CODE;
+					$status = file_put_contents($separate_config_file, $separate_config_code);
+					if($status > 1) {
+						$this -> messenger -> addSuccessMessage(ucwords($config_key)." configuration file of \"{$menu['name']}\" was generated successfully.");
+					} else {
+						$this -> messenger -> addErrorMessage("Error encountered while generating ".ucwords($config_key)." configuration file of \"{$menu['name']}\"."); 			
+					}
+				}
+			} else {				
+				$global_menu_config .= <<<CODE
 
+			'{$menu['name']}_menu' => array({$code_array['menu']}
+			),
+			'{$menu['name']}_breadcrumbs' => array({$code_array['breadcrumbs']}
+			),
+			'{$menu['name']}_sitemap' => array({$code_array['sitemap']}
+			),
+CODE;
+			}
 		}
-		$menu_code = $code;
 
-		$code = <<<CODE
+		$global_code = <<<CODE
 <?PHP
 return array(
 	'service_manager' => array(
         'factories' => array(
 CODE;
 		foreach($menus as $menu) {
-			$code .= <<<CODE
+			//static list of menu
+			$menuType = array('menu', 'breadcrumbs', 'sitemap');
+			foreach($menuType as $type) {
+				if($menu['separate_config'] === '1') {
+					$global_code .= <<<CODE
 
-			'navigation_{$menu['name']}_menu' => function(\$serviceLocator) {
-				\$navigation = new nGen\Zf2Navigation\Navigation\Service\NavigationProviderService(\$serviceLocator, '{$menu['name']}_menu');
-				return new Zend\Navigation\Navigation(\$navigation -> getPages());
-			},
-			'navigation_{$menu['name']}_breadcrumbs' => function(\$serviceLocator) {
-				\$navigation = new nGen\Zf2Navigation\Navigation\Service\NavigationProviderService(\$serviceLocator, '{$menu['name']}_breadcrumbs');
-				return new Zend\Navigation\Navigation(\$navigation -> getPages());
-			},
-			'navigation_{$menu['name']}_sitemap' => function(\$serviceLocator) {
-				\$navigation = new nGen\Zf2Navigation\Navigation\Service\NavigationProviderService(\$serviceLocator, '{$menu['name']}_sitemap');
+			'navigation_{$menu['name']}_$type' => function(\$serviceLocator) {
+				\$navigation = new nGen\Zf2Navigation\Navigation\Service\SeparatedNavigationProviderService(\$serviceLocator, '{$menu['name']}', '$type');
 				return new Zend\Navigation\Navigation(\$navigation -> getPages());
 			},
 CODE;
+				} else {
+					$global_code .= <<<CODE
+
+			'navigation_{$menu['name']}_$type' => function(\$serviceLocator) {
+				\$navigation = new nGen\Zf2Navigation\Navigation\Service\NavigationProviderService(\$serviceLocator, '{$menu['name']}_$type');
+				return new Zend\Navigation\Navigation(\$navigation -> getPages());
+			},
+CODE;
+				}	
+			}
 		}
 
-		$code .= <<<CODE
+		$global_code .= <<<CODE
 
         )
     ), //service_manager
     'navigation' => array(
-{$menu_code}	
+{$global_menu_config}	
 	),
 );
 CODE;
 
-		$status = file_put_contents($file, $code);
+		$status = file_put_contents($global_file, $global_code);
 		if($status > 1) {
 			$bytes = $status;
-			$this -> messenger -> addSuccessMessage(ceil($bytes / 1024)." KB of Menu Configuration generated.");
+			$this -> messenger -> addSuccessMessage(ceil($bytes / 1024)." KB of Global Menu Configuration generated.");
 		} else {
-			$this -> messenger -> addErrorMessage("Error encountered while generating."); 			
+			$this -> messenger -> addErrorMessage("Error encountered while generating the global configuration."); 			
 		}
 		return $this -> redirectToMain();
 		

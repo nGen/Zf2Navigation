@@ -40,6 +40,26 @@ class NavigationContainerForm extends Form
                 'label' => 'Name',
             ),
         ));
+
+        $this->add(array(
+            'name' => 'separate_config',
+            'type'  => 'radio',
+            'attributes' => array(
+                'id' => 'active',
+                'value' => '0',
+            ),
+            'options' => array(
+                'label' => 'Separate Configuration',
+                'value_options' => array(
+                    array('label' => 'Yes', 'value' => '1', 'label_attributes' => array('class' => 'radio-inline')),
+                    array('label' => 'No', 'value' => '0', 'label_attributes' => array('class' => 'radio-inline')),
+                ),
+                'disable-twb' => true,
+                'label_attributes' => array(
+                    'class' => 'show'
+                )
+            ),
+        ));
         
         $this->add(array(
             'name' => 'submit',

@@ -24,4 +24,9 @@ return array(
             'nGenZf2NavigationPageMapper' => 'nGen\Zf2Navigation\NavigationManagement\Mapper\Factory\NavigationPageMapperFactory',
         )
     ),
+    'view_helpers' => array(
+        'invokables' => array(
+            'nGenNavigation' => 'nGen\Zf2Navigation\NavigationManagement\Helper\NgenNavigation',
+        ),
+    ),
 );
